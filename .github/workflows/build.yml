@@ -13,23 +13,21 @@ jobs:
       uses: actions/checkout@v1
     - name: Build
       run: |
+        VERSION=$(git rev-parse --short ${{ github.sha }})
         if [ ${{ github.event_name }} == "release" ]; then
           VERSION="${{ github.ref_name }}"
-        else
-          VERSION=$(git rev-parse --short ${{ github.sha }})
         fi
 
-        make
+        make VERSION=${VERSION}
     - name: Deploy
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
         DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
       if: github.event_name != 'pull_request' && github.repository == 'jamjarlabs/jamjar-build-image'
       run: |
+        VERSION=$(git rev-parse --short ${{ github.sha }})
         if [ ${{ github.event_name }} == "release" ]; then
           VERSION="${{ github.ref_name }}"
-        else
-          VERSION=$(git rev-parse --short ${{ github.sha }})
         fi
 
         echo "$DOCKER_PASS" | docker login --username=$DOCKER_USER --password-stdin
