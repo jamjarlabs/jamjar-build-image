@@ -1,4 +1,4 @@
-NAME=jamjar-build-image
+NAME=jamjarlabs/jamjar-build-image
 VERSION=dev
 
 default:
