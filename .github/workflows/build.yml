@@ -1,0 +1,40 @@
+name: build
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone project code
+      uses: actions/checkout@v1
+    - name: Build
+      run: |
+        if [ ${{ github.event_name }} == "release" ]; then
+          VERSION="${{ github.ref_name }}"
+        else
+          VERSION=$(git rev-parse --short ${{ github.sha }})
+        fi
+
+        make
+    - name: Deploy
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+      if: github.event_name != 'pull_request'
+      run: |
+        if [ ${{ github.event_name }} == "release" ]; then
+          VERSION="${{ github.ref_name }}"
+        else
+          VERSION=$(git rev-parse --short ${{ github.sha }})
+        fi
+
+        echo "$DOCKER_PASS" | docker login --username=$DOCKER_USER --password-stdin
+        docker push jamjarlabs/jamjar-build-image:${VERSION}
+        if [ ${{ github.event_name }} == "release" ]; then
+          docker tag jamjarlabs/jamjar-build-image:${VERSION} jamjarlabs/jamjar-build-image:latest
+          docker push jamjarlabs/jamjar-build-image:latest
+        fi
