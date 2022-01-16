@@ -24,7 +24,7 @@ jobs:
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
         DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && github.repository == 'jamjarlabs/jamjar-build-image'
       run: |
         if [ ${{ github.event_name }} == "release" ]; then
           VERSION="${{ github.ref_name }}"
